@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mq-console
+  name: mq-cs
+  namespace: default
+spec:
+  type: LoadBalancer
+  ports:
+  - port: 80
+    targetPort: 8080
+  selector:
+    app: mq-console
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mq-console
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mq-console
+  template:
+    metadata:
+     labels:
+       app: mq-console
+    spec:
+      # affinity:
+      #   #podAntiAffinity 反亲合性
+      #   podAntiAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       - labelSelector:
+      #           matchExpressions:
+      #             - key: "app"
+      #               operator: In
+      #               values:
+      #                 - mq-console
+      #         topologyKey: "kubernetes.io/hostname"
+      containers:
+      - name: mq-console
+        image: gguilin/rocketmq-console-ng
+        imagePullPolicy: IfNotPresent
+        env:
+          - name: JAVA_OPTS
+            value: "-Drocketmq.namesrv.addr=mq-ns.default.svc.cluster.local:9876 -Dcom.rocketmq.sendMessageWithVIPChannel=false"
+        readinessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 15
+      #启动依赖
+      initContainers:
+      - name: init-mq-ns
+        image: busybox:latest
+        command: ['sh', '-c', "until nslookup mq-ns.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mq-ns; sleep 2; done"]

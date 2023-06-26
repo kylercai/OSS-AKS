@@ -1,0 +1,96 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: broker-a
+  name: broker-a
+  namespace: default
+spec:
+  # type: NodePort
+  type: ClusterIP
+  ports:
+  - port: 10911
+    targetPort: 10911
+    name: broker-port
+  selector:
+    app: broker-a
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: broker-a
+  namespace: default
+spec:
+  serviceName: broker-a
+  replicas: 1
+  selector:
+    matchLabels:
+      app: broker-a
+  template:
+    metadata:
+     labels:
+       app: broker-a
+    spec:
+      # affinity:
+      #   #podAntiAffinity 反亲合性
+      #   podAntiAffinity:
+      #     requiredDuringSchedulingIgnoredDuringExecution:
+      #       - labelSelector:
+      #           matchExpressions:
+      #           - key: "app"
+      #             operator: In
+      #             values:
+      #               - broker-a
+      #         topologyKey: "kubernetes.io/hostname"
+      nodeSelector:
+        topology.kubernetes.io/zone: eastus2-1      
+      containers:
+      - name: broker-a
+        #image: foxiswho/rocketmq:4.8.0   #下面使用的是用官方地址自行构建的镜像，推荐直接使用这个
+        image: apacherocketmq/rocketmq:4.6.0
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0                
+        env:
+          - name: TZ
+            value: Asia/Shanghai
+          - name: NAMESRV_ADDR
+            value: "mq-ns.default.svc.cluster.local:9876"
+          - name: JAVA_OPT_EXT
+            value: "-Duser.home=/home/rocketmq -Xms512M -Xmx512M -Xmn128m"
+        command: ["sh","-c","./mqbroker -c /home/broker.conf"]
+        volumeMounts:
+          - name: rocketmq-data
+            mountPath: /home/rocketmq/logs
+          - name: rocketmq-data
+            mountPath: /home/rocketmq/store
+          - name: broker-config
+            mountPath: /home/broker.conf
+            subPath: broker.conf
+        readinessProbe:
+          tcpSocket:
+            port: 10911
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
+          periodSeconds: 20
+      volumes:
+      - name: broker-config
+        configMap:
+          name: broker-a
+      #启动依赖
+      initContainers:
+      - name: init-mq-ns
+        image: busybox:latest
+        command: ['sh', '-c', "until nslookup mq-ns.$(cat /var/run/secrets/kubernetes.io/serviceaccount/namespace).svc.cluster.local; do echo waiting for mq-ns; sleep 2; done"]
+
+  volumeClaimTemplates:
+  - metadata:
+      name: rocketmq-data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: "managed-csi-zrs"
+      resources:
+        requests:
+          storage: 10Gi
