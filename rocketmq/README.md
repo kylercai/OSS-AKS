@@ -54,7 +54,7 @@ kubectl get service
 
 **access the IP:**
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/console-1.jpg)
-![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/console-1.jpg)
+![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/console-2.jpg)
 
 ### 10. test RocketMQ
 **get into broker-a-0 pod:**
