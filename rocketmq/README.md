@@ -16,21 +16,21 @@ kubectl apply -f brokers-configmap.yml
 
 ### 4. install storage class to support zone redundant persistent volume into AKS
 ```
-kubectl apply -f storageclass.yml
+kubectl apply -f storageclasszrs.yml
 ```
-**you can refer to https://learn.microsoft.com/en-us/azure/aks/concepts-storage#storage-classes for details**
+_you can refer to https://learn.microsoft.com/en-us/azure/aks/concepts-storage#storage-classes for details_
 
 ### 5. install brokers (broker-a & broker-b) master nodes
 ```
 kubectl apply -f brokers-masters.yml
 ```
-**The broker-a master will be placed in zone-1, and the broker-b master will be placed in zone-2**
+_The broker-a master will be placed in zone-1, and the broker-b master will be placed in zone-2_
 
 ### 6. install brokers (broker-a & broker-b) slave nodes
 ```
 kubectl apply -f brokers-slaves.yml
 ```
-**The slaves will be placed in zone-3**
+_The slaves will be placed in zone-3_
 
 ### 7. install RocketMQ console into AKS
 ```
@@ -50,8 +50,9 @@ kubectl get pods -o wide
 kubectl get service
 ```
 **get the console service IP:** 
-![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/get-services.jpg)
-**access the IP**
+![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/get-services.jpg) <br>
+
+**access the IP:**
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/console-1.jpg)
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/console-1.jpg)
 
