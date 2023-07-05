@@ -1,4 +1,6 @@
-# Note: The included sample manifest files use Azure Region eastus2.
+# Note: 
+**The included sample manifest files use Azure Region eastus2.**
+**The included sample run RocketMQ Controller inside of NameServer.**
 
 ## Steps:
 ### 1. create AKS with multiple AZ support. 
@@ -20,36 +22,27 @@ kubectl apply -f nameserver-controller.yml
 kubectl apply -f raft-brokers-configmap.yml
 ```
 
-### 5. install broker (broker name: broker0) with multiple AZ distributed. The broker instance number is defined by replicas in raft-broker0.yml
+### 5. install broker (broker name: broker0) with multiple AZ. 
+**The broker instance number is defined by replicas in raft-broker0.yml. The number should always be an odd number.**
+**The broker instances will be scheduled/distributed across multiple zones.**
+**For now we run the broker with just 1 instance for starting up.**
 ```
 kubectl apply -f raft-broker0.yml
 ```
-_The broker instances will be scheduled/distributed across multiple zones. The maximum instance number difference between zones is 1 (defined by topologySpreadConstraints.maxSkew : 1)_
 
 ### 6. install RocketMQ console into AKS
 ```
 kubectl apply -f console.yml
 ```
 
-### 7. scale out the broker instances. The number should always be an odd number
-```
-kubectl scale --replicas=3 statefulset/broker0
-```
-
-### 7. check your installation, and verify the broker instances are scheduled across multiple zones
+### 7. check your installation
 ```
 kubectl get pods -o wide
 ```
-**you should see 7 pods: 3 nameserver/controller pods, 3 broker pods, 1 console pod.**
-**You will see like below:**
-![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/get-pods.jpg)
-**You will see the broker instances are scheduled across multiple zones:**
-![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/get-pods.jpg)
-**You will see the broker has 1 master instance and the rest are slave instances**
+**you should see 5 pods: 3 nameserver/controller pods, 1 broker pods, 1 console pod.**
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/get-pods.jpg)
 
-
-### 9. access RocketMQ console
+### 8. access RocketMQ console
 ```
 kubectl get service
 ```
@@ -60,13 +53,46 @@ kubectl get service
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/console-1.jpg)
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/console-2.jpg)
 
-### 10. Send a test message to broker on console
+### 9. scale out the broker instances. The number should always be an odd number, for example 3
+```
+kubectl scale --replicas=3 statefulset/broker0
+```
+
+### 10. check your installation, and verify the broker instances are scheduled across multiple zones
+```
+kubectl get pods -o wide
+```
+_The broker instances will be scheduled/distributed across multiple zones. The maximum instance number difference between zones is 1 (defined by topologySpreadConstraints.maxSkew : 1)_
+
+**you should see 7 pods: 3 nameserver/controller pods, 3 broker pods, 1 console pod.**
+**You will see like below:**
+![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/get-pods.jpg)
+**You will see the broker instances are scheduled across multiple zones:**
+![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/get-pods.jpg)
+**You will see the broker has 1 master instance and the rest are slave instances**
+![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/get-pods.jpg)
+
+
+### 11. Send a test message to broker on console
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/msg-producer.jpg)
 
-### 11. Verify the auto failover for broker instances
+### 12. Verify the auto failover for broker instances
 **get the AKS console to delete the broker master instance pod:** 
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/msg-producer.jpg)
 **after the broker master instance pod terminated, in the RocketMQ console you will see the master node is automatically switched over to another pod instance:** 
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/msg-producer.jpg)
+**send a message to verify the broker is still working:**
+![](
 **because we run broker instances with StatefulSet, it will automatically recover the pod instance we killed above. Once the pod is recoved, it plays as slave role:** 
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq/msg-producer.jpg)
+
+### 13. Verify the scale in/out for broker instances
+```
+kubectl scale --replicas=1 statefulset/broker0
+```
+**after the broker instances scaled in, in the RocketMQ console you will see the broker instances are scaled in:**
+![](
+**on the RocketMQ console, you can see broker makes sure there is master running:**
+![](
+**send a message to verify the broker is still working:**
+![](
