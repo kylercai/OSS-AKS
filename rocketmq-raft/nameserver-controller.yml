@@ -1,0 +1,281 @@
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mq-namesrv-0
+  name: mq-ns-0
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9876
+    targetPort: 9876
+    name: namesrv-port
+  - port: 9878
+    targetPort: 9878
+    name: controller-port
+  selector:
+    app: mq-namesrv-0
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mq-namesrv-0
+  namespace: default
+spec:
+  serviceName: mq-namesrv-0
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mq-namesrv-0
+  template:
+    metadata:
+     labels:
+       app: mq-namesrv-0
+    spec:
+      affinity:
+        #podAntiAffinity 反亲合性
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: "app"
+                  operator: In
+                  values:
+                    - mq-namesrv-0
+              topologyKey: "kubernetes.io/hostname"
+      nodeSelector:
+        topology.kubernetes.io/zone: eastus2-1
+      containers:
+      - name: mq-namesrv-0
+        image: apache/rocketmq:5.0.0
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0            
+        env:
+          - name: TZ
+            value: Asia/Shanghai
+          - name: JAVA_OPT_EXT
+            value: "-Duser.home=/home/rocketmq -Xms512M -Xmx512M -Xmn128m"
+        command: ["sh","-c","./mqnamesrv -c /home/namesrv.conf"]
+        volumeMounts:
+          - name: rocketmq-data
+            mountPath: /home/rocketmq/logs
+          - name: rocketmq-data
+            mountPath: /home/rocketmq/store
+          - name: rocketmq-data
+            mountPath: /home/rocketmq/DledgerController
+          - name: namesrv-config
+            mountPath: /home/namesrv.conf
+            subPath: namesrv.conf
+        readinessProbe:
+          tcpSocket:
+            port: 9876
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
+          periodSeconds: 20
+      volumes:
+      - name: namesrv-config
+        configMap:
+          name: namesvrcontroller-0
+
+  volumeClaimTemplates:
+  - metadata:
+      name: rocketmq-data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: "managed-csi"
+      resources:
+        requests:
+          storage: 10Gi       
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mq-namesrv-1
+  name: mq-ns-1
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9876
+    targetPort: 9876
+    name: namesrv-port
+  - port: 9878
+    targetPort: 9878
+    name: controller-port
+  selector:
+    app: mq-namesrv-1
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mq-namesrv-1
+  namespace: default
+spec:
+  serviceName: mq-namesrv-1
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mq-namesrv-1
+  template:
+    metadata:
+     labels:
+       app: mq-namesrv-1
+    spec:
+      affinity:
+        #podAntiAffinity 反亲合性
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: "app"
+                  operator: In
+                  values:
+                    - mq-namesrv-1
+              topologyKey: "kubernetes.io/hostname"
+      nodeSelector:
+        topology.kubernetes.io/zone: eastus2-2
+      containers:
+      - name: mq-namesrv-1
+        image: apache/rocketmq:5.0.0
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0            
+        env:
+          - name: TZ
+            value: Asia/Shanghai
+          - name: JAVA_OPT_EXT
+            value: "-Duser.home=/home/rocketmq -Xms512M -Xmx512M -Xmn128m"
+        command: ["sh","-c","./mqnamesrv -c /home/namesrv.conf"]
+        volumeMounts:
+          - name: rocketmq-data
+            mountPath: /home/rocketmq/logs
+          - name: rocketmq-data
+            mountPath: /home/rocketmq/store
+          - name: rocketmq-data
+            mountPath: /home/rocketmq/DledgerController
+          - name: namesrv-config
+            mountPath: /home/namesrv.conf
+            subPath: namesrv.conf
+        readinessProbe:
+          tcpSocket:
+            port: 9876
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
+          periodSeconds: 20
+      volumes:
+      - name: namesrv-config
+        configMap:
+          name: namesvrcontroller-1
+
+  volumeClaimTemplates:
+  - metadata:
+      name: rocketmq-data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: "managed-csi"
+      resources:
+        requests:
+          storage: 10Gi  
+
+
+---
+apiVersion: v1
+kind: Service
+metadata:
+  labels:
+    app: mq-namesrv-2
+  name: mq-ns-2
+  namespace: default
+spec:
+  type: ClusterIP
+  ports:
+  - port: 9876
+    targetPort: 9876
+    name: namesrv-port
+  - port: 9878
+    targetPort: 9878
+    name: controller-port
+  selector:
+    app: mq-namesrv-2
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: mq-namesrv-2
+  namespace: default
+spec:
+  serviceName: mq-namesrv-2
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mq-namesrv-2
+  template:
+    metadata:
+     labels:
+       app: mq-namesrv-2
+    spec:
+      affinity:
+        #podAntiAffinity 反亲合性
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchExpressions:
+                - key: "app"
+                  operator: In
+                  values:
+                    - mq-namesrv-2
+              topologyKey: "kubernetes.io/hostname"
+      nodeSelector:
+        topology.kubernetes.io/zone: eastus2-3
+      containers:
+      - name: mq-namesrv-2
+        image: apache/rocketmq:5.0.0
+        imagePullPolicy: IfNotPresent
+        securityContext:
+          allowPrivilegeEscalation: false
+          runAsUser: 0            
+        env:
+          - name: TZ
+            value: Asia/Shanghai
+          - name: JAVA_OPT_EXT
+            value: "-Duser.home=/home/rocketmq -Xms512M -Xmx512M -Xmn128m"
+        command: ["sh","-c","./mqnamesrv -c /home/namesrv.conf"]
+        volumeMounts:
+          - name: rocketmq-data
+            mountPath: /home/rocketmq/logs
+          - name: rocketmq-data
+            mountPath: /home/rocketmq/store
+          - name: rocketmq-data
+            mountPath: /home/rocketmq/DledgerController
+          - name: namesrv-config
+            mountPath: /home/namesrv.conf
+            subPath: namesrv.conf
+        readinessProbe:
+          tcpSocket:
+            port: 9876
+          initialDelaySeconds: 15
+          timeoutSeconds: 5
+          periodSeconds: 20
+      volumes:
+      - name: namesrv-config
+        configMap:
+          name: namesvrcontroller-2
+
+  volumeClaimTemplates:
+  - metadata:
+      name: rocketmq-data
+    spec:
+      accessModes:
+        - ReadWriteOnce
+      storageClassName: "managed-csi"
+      resources:
+        requests:
+          storage: 10Gi  

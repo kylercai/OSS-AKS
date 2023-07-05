@@ -1,0 +1,24 @@
+apiVersion: v1
+data:
+  broker.conf: |-
+    brokerClusterName=RaftCluster
+    brokerName=raftbroker
+    brokerId = -1
+    brokerRole = SLAVE
+    listenPort=10911
+    namesrvAddr=mq-ns-0.default.svc.cluster.local:9876;mq-ns-1.default.svc.cluster.local:9876;mq-ns-2.default.svc.cluster.local:9876
+    deleteWhen = 04
+    fileReservedTime = 48
+    enableControllerMode = true
+    controllerAddr = mq-ns-0.default.svc.cluster.local:9878;mq-ns-1.default.svc.cluster.local:9878;mq-ns-2.default.svc.cluster.local:9878
+    allAckInSyncStateSet=true
+    syncBrokerMetadataPeriod = 5000
+    enableElectUncleanMaster = true
+    storePathEpochFile = /home/rocketmq/store
+    storePathRootDir=/home/rocketmq/store/node00
+    storePathCommitLog=/home/rocketmq/store/node00/commitlog
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: broker0
+  namespace: default

@@ -1,0 +1,52 @@
+apiVersion: v1
+data:
+  namesrv.conf: |-
+    listenPort = 9876
+    enableControllerInNamesrv = true
+    controllerDLegerGroup = group1
+    controllerDLegerPeers = n0-mq-ns-0.default.svc.cluster.local:9878;n1-mq-ns-1.default.svc.cluster.local:9878;n2-mq-ns-2.default.svc.cluster.local:9878
+    controllerDLegerSelfId = n0
+    controllerStorePath = /home/rocketmq/DledgerController
+    enableElectUncleanMaster = false
+    notifyBrokerRoleChanged = true
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: namesvrcontroller-0
+  namespace: default
+
+---
+apiVersion: v1
+data:
+  namesrv.conf: |-
+    listenPort = 9876
+    enableControllerInNamesrv = true
+    controllerDLegerGroup = group1
+    controllerDLegerPeers = n0-mq-ns-0.default.svc.cluster.local:9878;n1-mq-ns-1.default.svc.cluster.local:9878;n2-mq-ns-2.default.svc.cluster.local:9878
+    controllerDLegerSelfId = n1
+    controllerStorePath = /home/rocketmq/DledgerController
+    enableElectUncleanMaster = false
+    notifyBrokerRoleChanged = true
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: namesvrcontroller-1
+  namespace: default
+
+---
+apiVersion: v1
+data:
+  namesrv.conf: |-
+    listenPort = 9876
+    enableControllerInNamesrv = true
+    controllerDLegerGroup = group1
+    controllerDLegerPeers = n0-mq-ns-0.default.svc.cluster.local:9878;n1-mq-ns-1.default.svc.cluster.local:9878;n2-mq-ns-2.default.svc.cluster.local:9878
+    controllerDLegerSelfId = n2
+    controllerStorePath = /home/rocketmq/DledgerController
+    enableElectUncleanMaster = false
+    notifyBrokerRoleChanged = true
+kind: ConfigMap
+metadata:
+  creationTimestamp: null
+  name: namesvrcontroller-2
+  namespace: default
