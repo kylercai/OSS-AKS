@@ -61,6 +61,8 @@ kubectl scale --replicas=3 statefulset/broker0
 ```
 
 ### 10. check your installation, and verify the broker instances are scheduled across multiple zones
+_*The broker instances will be scheduled/distributed across multiple zones._<br>
+_*The maximum instance number difference between zones is 1 (defined by topologySpreadConstraints.maxSkew : 1 in the raft-broker0.yml)_<br>
 ```
 kubectl get pods -o wide
 ```
@@ -68,10 +70,6 @@ kubectl get pods -o wide
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq-raft/03-step10-1-check-your-installation.jpg)
 **And the broker instances are scheduled across multiple zones:**
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq-raft/03-step10-3-nodes-across-AZ.jpg)
-<br>
-_*The broker instances will be scheduled/distributed across multiple zones._<br>
-_*The maximum instance number difference between zones is 1 (defined by topologySpreadConstraints.maxSkew : 1 in the raft-broker0.yml)_
-
 **on the RocketMQ console, you will see the broker has 1 master instance and the rest are slave instances**
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq-raft/03-step10-2-console-master-slaves.jpg)
 
