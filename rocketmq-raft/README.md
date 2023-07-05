@@ -94,7 +94,7 @@ _*because we run broker instances with StatefulSet, it will automatically recove
 kubectl scale --replicas=1 statefulset/broker0
 ```
 **after the broker instances scaled in, in the RocketMQ console you will see the broker instances are scaled in, and you can see broker makes sure there is running master node:**
-![](
+![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq-raft/06-step13-1-scale-in-result.jpg)
 _*You can then send another test message to verify the broker is still working_
 
 **End**
