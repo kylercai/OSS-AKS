@@ -66,6 +66,7 @@ kubectl get pods -o wide
 ```
 **you should see 7 pods: 3 nameserver/controller pods, 3 broker pods, 1 console pod. And the broker instances are scheduled across multiple zones:**
 ![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq-raft/03-step10-1-check-your-installation.jpg)
+![](https://github.com/kylercai/OSS-AKS/blob/master/rocketmq-raft/03-step10-3-nodes-across-AZ.jpg)
 _*The broker instances will be scheduled/distributed across multiple zones._<br>
 _*The maximum instance number difference between zones is 1 (defined by topologySpreadConstraints.maxSkew : 1 in the raft-broker0.yml)_
 
